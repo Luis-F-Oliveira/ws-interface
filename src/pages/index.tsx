@@ -4,4 +4,6 @@ import { Error } from "./error"
 import { Register } from "./register"
 import { Database } from "./database"
 import { Edit } from "./edit"
-export { Login, Home, Error, Register, Database, Edit }
+import { Chart } from "./chart"
+
+export { Login, Home, Error, Register, Database, Edit, Chart }
