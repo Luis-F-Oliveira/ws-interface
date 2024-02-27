@@ -9,7 +9,7 @@ import {
 import { AxiosContext } from "@/context"
 import { getItems } from "@/services/database/Resource"
 import { Data, IndexPromise } from "@/services/database/Resource/getItems"
-import Cookies from "js-cookie"
+import Cookies from 'js-cookie'
 import { Command, Container, MessageSquareWarning, MousePointerSquare, Plus, RefreshCcw, Search, TerminalSquare } from "lucide-react"
 import { FormEventHandler, useContext, useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
@@ -217,14 +217,14 @@ const Resource = ({ cardValue }: ResourceProps) => {
                             <Tooltip>
                                 <TooltipTrigger>
                                     <RefreshCcw className='cursor-pointer' onClick={refresh} size={32} />
-                                    </TooltipTrigger>
+                                </TooltipTrigger>
                                 <TooltipContent className='bg-white text-black'>
                                     Recarregar
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                         <div className='flex items-center border py-1 pl-1 pr-2 rounded-md'>
-                            <Search className='text-black bg-white rounded mr-5 p-1' size={26} />
+                            <Search className='text-black bg-white rounded mr-2 p-1' size={26} />
                             <Command size={18} />
                             <Plus size={18} />
                             <span className='text-lg'>K</span>
@@ -254,7 +254,7 @@ const Resource = ({ cardValue }: ResourceProps) => {
                     <TableBody>
                         {data.map((option, index) => (
                             <TableRow key={index}>
-                                <TableCell className='w-12 flex justify-center'>
+                                <TableCell className='w-12 relative'>
                                     <Link to={`/edit?option=${cardValue}&id=${option.id}`}>
                                         <MousePointerSquare />
                                     </Link>
