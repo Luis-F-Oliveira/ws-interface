@@ -4,7 +4,6 @@ import { Error } from "./error"
 import { Register } from "./register"
 import { Database } from "./database"
 import { Edit } from "./edit"
-import { Chart } from "./chart"
-import { ResponsePage } from "./response"
+import { ChartsPage } from "./chart"
 
-export { Login, Message, Error, Register, Database, Edit, Chart, ResponsePage }
+export { Login, Message, Error, Register, Database, Edit, ChartsPage }

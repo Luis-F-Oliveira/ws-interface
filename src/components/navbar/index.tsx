@@ -1,6 +1,13 @@
 import { useUser } from "@/context"
 import { Database, LogOut, MessageCircleMore, PieChart, UserRound } from "lucide-react"
 import { Link } from "react-router-dom"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 
 export const Navbar = () => {
   const { user, logoutUser } = useUser()
@@ -21,9 +28,23 @@ export const Navbar = () => {
           </Link>
         </li>
         <li>
-          <Link className="flex items-center gap-1" to={'/charts'}>
-            <PieChart className="mb-1" size={19} /> <span>Gráficos</span>
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger className='flex items-center gap-1'>
+              <PieChart className="mb-1" size={19} /> <span>Gráficos</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>
+                <Link className='hover:font-bold w-full' to={'/charts/sectors'}>
+                  Setores
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link className='hover:font-bold w-full' to={'/charts/questions'}>
+                  Duvidas
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </li>
         <li>
           <Link className="flex items-center gap-1" to={'/database'}>

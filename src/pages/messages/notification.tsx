@@ -6,7 +6,7 @@ import {
     CommandItem,
     CommandList
 } from "@/components/ui/command"
-import { AlarmClock, Bell, Calendar, Command, MessageCircleReply, MessageSquareReply, Plus, Search } from "lucide-react"
+import { AlarmClock, Bell, Calendar, Command, HelpCircle, MessageCircleReply, MessageSquareReply, Phone, Plus, Search } from "lucide-react"
 import { useContext, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,11 +15,11 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Link } from "react-router-dom"
 import { getMessages } from "@/services/messages/getMessage"
 import { AxiosContext } from "@/context"
 import Cookies from 'js-cookie'
 import { Data, Status } from "@/services/messages/@types"
+import { toast } from "react-toastify"
 
 const formatDate = (dateTimeString: string) => {
     const [datePart, _] = dateTimeString.split('-');
@@ -68,6 +68,26 @@ export const Notification = () => {
     const { api } = useContext(AxiosContext)
     const token = Cookies.get('jwt')
 
+    const updateAnswered = async (id: number) => {
+        await api.get(`/commits/answered/${id}`, {
+            'headers': {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then((response) => {
+                if (response.status !== 200) {
+                    toast.error('Aconteceu um erro ao atualizar estado')
+                }
+
+                toast.success('Pergunta marcada como respondida!')
+            })
+            .catch((error) => {
+                if (error.response.status === 401) {
+                    toast.warning('Pergunta já respondida')
+                }
+            })
+    }
+
     const response = async () => {
         const indexPromise: Status = await index(api, token)
 
@@ -78,6 +98,8 @@ export const Notification = () => {
 
     useEffect(() => {
         response()
+        const interval = setInterval(response, 5000)
+        return () => clearInterval(interval)
     }, [api])
 
     if (data) {
@@ -87,60 +109,76 @@ export const Notification = () => {
                     <div>
                         <h2 className='flex items-center text-3xl gap-1'>Notificações <Bell size={32} /></h2>
                     </div>
-                    <div className='flex items-center border py-1 pl-1 pr-2 rounded-md'>
-                        <Search className='text-black bg-white rounded mr-2 p-1' size={26} />
-                        <Command size={18} />
-                        <Plus size={18} />
-                        <span className='text-lg'>K</span>
-                    </div>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <div className='flex items-center border py-1 pl-1 pr-2 rounded-md'>
+                                    <Search className='text-black bg-white rounded mr-2 p-1' size={26} />
+                                    <Command size={18} />
+                                    <Plus size={18} />
+                                    <span className='text-lg'>K</span>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent className='bg-white text-black'>
+                                <p>Command ou CTRL + K para pesquisar</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
                 <SearchCommand />
                 {data.map((value, index) => (
-                    <div 
-                        key={index} 
+                    <div
+                        key={index}
                         className={`border-l-4 hover:border-blue-500 pl-2 
-                        my-5 flex justify-between items-start 
-                        ${ value.answered ? 'border-green-500' : 'border-red-500'}`}
+                        my-8 py-1 flex justify-between items-start 
+                        ${value.answered ? 'border-green-500' : 'border-red-500'}`}
                     >
                         <div>
-                            <h1>{ value.number_from }</h1>
-                            <h2>{ value.command.name }</h2>
+                            <h1 className='text-lg flex items-center gap-1'>
+                                <Phone size={20} /> {value.number_from}
+                            </h1>
+                            <h2 className='mt-2 flex items-center gap-1'>
+                                <HelpCircle className='mb-1' size={19} /> Pergunta
+                            </h2>
+                            <p className='w-3/3 pl-2 pr-10 h-auto break-all'>
+                                {value.question}
+                            </p>
                         </div>
                         <div className="flex flex-col items-end">
                             <div className='pb-8 flex gap-3'>
-                                <p className='flex gap-1'>
-                                    <Calendar /> { formatDate(value.created_at) }
+                                <p className='flex items-center gap-1'>
+                                    <Calendar /> {formatDate(value.created_at)}
                                 </p>
-                                <p className='flex gap-1'>
-                                    <AlarmClock /> { formatTime(value.created_at) }
+                                <p className='flex items-center gap-1'>
+                                    <AlarmClock /> {formatTime(value.created_at)}
                                 </p>
                             </div>
-                            <div className='flex gap-1'>
-                                <TooltipProvider>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button variant={'secondary'}>
-                                                <Link to={'/response'}>
+                            {value.answered ? null : (
+                                <div className='flex gap-1'>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button variant={'secondary'}>
                                                     <MessageSquareReply />
-                                                </Link>
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent className='bg-white text-black'>
-                                            <p>Responder</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <Button variant={'secondary'}>
-                                                <MessageCircleReply />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent className='bg-white text-black'>
-                                            <p>Respondido pelo Whatsapp</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            </div>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className='bg-white text-black'>
+                                                <p>Em obras...</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger>
+                                                <Button onClick={() => updateAnswered(value.id)} variant={'secondary'}>
+                                                    <MessageCircleReply />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className='bg-white text-black'>
+                                                <p>Respondido pelo Whatsapp</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

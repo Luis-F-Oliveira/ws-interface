@@ -8,13 +8,11 @@ export const AlertSpam = () => {
                 <MessageSquareWarning /> Atenção!
             </AlertTitle>
             <AlertDescription className='text-justify'>
-                Nesta página, você encontrará mensagens enviadas e respondidas pelo bot,
-                além de mensagens para você responder. Existem duas formas de responder
-                uma mensagem. A primeira é respondendo dentro da página atual, porém isso
-                tem algumas limitações, como a impossibilidade de enviar imagens. A outra
-                opção é responder através do WhatsApp. Ao optar pelo WhatsApp, será
-                necessário clicar em "Respondido pelo WhatsApp", pois isso marcará a
-                mensagem como respondida para o sistema.
+                Nesta página, você encontrará mensagens enviadas diretamente a
+                você. Atualmente, o sistema de mensagens dentro da própria interface
+                está em processo de criação. Portanto, a única forma seria através
+                da marcação "Respondido pelo WhatsApp" e da resposta pessoal no
+                WhatsApp.
             </AlertDescription>
         </Alert>
     )

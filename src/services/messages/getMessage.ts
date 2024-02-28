@@ -20,6 +20,7 @@ export function getMessages() {
                     const mappedData: Data[] = response.data.map((item: any) => {
                         return {
                             id: item.id,
+                            question: item.question,
                             number_from: item.number_from,
                             answered: item.answered,
                             created_at: item.created_at,

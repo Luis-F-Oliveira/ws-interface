@@ -6,6 +6,7 @@ export interface Status {
 
 export interface Data {
     id: number
+    question: string
     number_from: string
     answered: number
     created_at: string
