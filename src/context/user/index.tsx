@@ -6,9 +6,14 @@ interface User {
     email: string
 }
 
+interface Token {
+    value: string
+}
+
 interface UserContextProps {
-    user: User | null,
-    loginUser: (userData: User) => void,
+    user: User | null
+    token: Token | null
+    loginUser: (userData: User, token: Token) => void
     logoutUser: () => void
 }
 
@@ -33,21 +38,29 @@ export function UserProvider({ children }: UserProviderProps)
         const savedUser = localStorage.getItem('user');
         return savedUser ? JSON.parse(savedUser) : null;
     })
+    const [token, setToken] = useState<Token | null>(() => {
+        const savedToken = localStorage.getItem('jwt');
+        return savedToken ? { value: savedToken } : null;
+    })
 
-    function loginUser(userData: User)
+    function loginUser(userData: User, token: Token)
     {
         setUser(userData)
+        setToken(token)
         localStorage.setItem('user', JSON.stringify(userData))
+        localStorage.setItem('jwt', token.value)
     }
 
     function logoutUser()
     {
         setUser(null)
+        setToken(null)
         localStorage.removeItem('user')
+        localStorage.removeItem('jwt')
     }
 
     return (
-        <UserContext.Provider value={{ user, loginUser, logoutUser }}>
+        <UserContext.Provider value={{ user, token, loginUser, logoutUser }}>
             { children }
         </UserContext.Provider>
     )

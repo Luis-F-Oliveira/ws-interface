@@ -8,7 +8,6 @@ import { AuthService } from "@/services"
 import { AxiosContext, useUser } from "@/context"
 import { AuthenticateStatus } from "@/services/auth/login"
 import { toast } from "react-toastify"
-import Cookies from "js-cookie"
 
 type StateType<T> = [T, (newValue: T) => void]
 export const Login = () => {
@@ -27,11 +26,13 @@ export const Login = () => {
     if (authenticateStatus.success) {
       toast.success(`${authenticateStatus.user?.name}, seja bem vindo.`)
       if (authenticateStatus.user && authenticateStatus.token) {
-        Cookies.set('jwt', authenticateStatus.token)
         loginUser({
           id: authenticateStatus.user.id,
           name: authenticateStatus.user.name,
           email: authenticateStatus.user.email,
+        },
+        {
+          value: authenticateStatus.token
         })
       }
       navigate('/')

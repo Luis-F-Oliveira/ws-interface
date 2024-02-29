@@ -16,8 +16,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { getMessages } from "@/services/messages/getMessage"
-import { AxiosContext } from "@/context"
-import Cookies from 'js-cookie'
+import { AxiosContext, useUser } from "@/context"
 import { Data, Status } from "@/services/messages/@types"
 import { toast } from "react-toastify"
 
@@ -66,12 +65,12 @@ export const Notification = () => {
     const [data, setData] = useState<Data[] | undefined>(undefined)
     const { index } = getMessages()
     const { api } = useContext(AxiosContext)
-    const token = Cookies.get('jwt')
+    const { token } = useUser()
 
     const updateAnswered = async (id: number) => {
         await api.get(`/commits/answered/${id}`, {
             'headers': {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token?.value}`
             }
         })
             .then((response) => {
@@ -89,7 +88,7 @@ export const Notification = () => {
     }
 
     const response = async () => {
-        const indexPromise: Status = await index(api, token)
+        const indexPromise: Status = await index(api, token?.value)
 
         if (indexPromise.success) {
             setData(indexPromise.data)

@@ -1,7 +1,6 @@
-import { AxiosContext } from '@/context'
+import { AxiosContext, useUser } from '@/context'
 import { Data, GetSectorsPromise, getSectors } from '@/services/chart/getSectors'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-import Cookies from 'js-cookie'
 import { useContext, useEffect, useState } from 'react'
 import { Doughnut } from 'react-chartjs-2'
 import { backgroundColors, borderColors } from './@colors'
@@ -14,11 +13,13 @@ export const Sectors = () => {
     const [ counts, setCounts ] = useState<Array<number> | undefined>(undefined)
     const { api } = useContext(AxiosContext)
     const { index } = getSectors()
-    const token = Cookies.get('jwt')
+    const { token } = useUser()
 
     useEffect(() => {
         const usePromise = async () => {
-            const indexPromise: GetSectorsPromise = await index(api, token)
+            const indexPromise: GetSectorsPromise = await index(api, token?.value)
+
+            console.log(indexPromise)
 
             if (indexPromise.success) {
                 setResponse(indexPromise.data)

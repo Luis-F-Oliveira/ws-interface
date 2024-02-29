@@ -1,6 +1,5 @@
 import { Body } from "@/components"
-import { AxiosContext } from "@/context"
-import Cookies from "js-cookie"
+import { AxiosContext, useUser } from "@/context"
 import { FormEventHandler, useContext, useEffect, useState } from "react"
 import {
     Card,
@@ -42,7 +41,7 @@ const EditForm = ({ data, headers, url, id }: EditFormProps) => {
     const [response, setResponse] = useState<string>(data[0].return ? `${data[0].return}` : '')
     const [sector, setSector] = useState<string>(data[0].sector_id ? `${data[0].sector_id}` : '')
     const { api } = useContext(AxiosContext)
-    const token = Cookies.get('jwt')
+    const { token } = useUser()
     const { update } = updateItems()
     const navigate = useNavigate()
 
@@ -57,7 +56,7 @@ const EditForm = ({ data, headers, url, id }: EditFormProps) => {
     const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault()
 
-        const updatePromise: UpdateStatus = await update(api, url, id, name, response, sector, token)
+        const updatePromise: UpdateStatus = await update(api, url, id, name, response, sector, token?.value)
 
         if (updatePromise.success) {
             toast.success(`${name} ${updatePromise.message}`)
@@ -111,7 +110,7 @@ export const Edit = () => {
     const [deleteAlert, setDeleteAlert] = useState<boolean>(false)
 
     const { api } = useContext(AxiosContext)
-    const token = Cookies.get('jwt')
+    const { token } = useUser()
     const { show } = getItem()
     const location = useLocation()
     const searchParams = new URLSearchParams(location.search)
@@ -121,7 +120,7 @@ export const Edit = () => {
     const navigate = useNavigate()
 
     const fetchGetItem = async () => {
-        const showPromise: ShowPromise = await show(api, url, id, token)
+        const showPromise: ShowPromise = await show(api, url, id, token?.value)
 
         if (showPromise.success) {
             setHeaders(showPromise.headers)
@@ -134,7 +133,7 @@ export const Edit = () => {
     }
 
     const handleDestroy = async () => {
-        const destroyPromise: DeleteStatus = await destroy(api, url, id, token)
+        const destroyPromise: DeleteStatus = await destroy(api, url, id, token?.value)
 
         if (destroyPromise.success) {
             toast.success(`${destroyPromise.message}`)

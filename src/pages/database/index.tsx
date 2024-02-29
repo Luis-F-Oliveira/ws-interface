@@ -6,10 +6,9 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { AxiosContext } from "@/context"
+import { AxiosContext, useUser } from "@/context"
 import { getItems } from "@/services/database/Resource"
 import { Data, IndexPromise } from "@/services/database/Resource/getItems"
-import Cookies from 'js-cookie'
 import { Command, Container, MessageSquareWarning, MousePointerSquare, Plus, RefreshCcw, Search, TerminalSquare } from "lucide-react"
 import { FormEventHandler, useContext, useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
@@ -71,12 +70,12 @@ const FormEvent = ({ headers, cardValue }: CreateResourceProps) => {
     const [sectors, setSectors] = useState<{ id: number; name: string }[]>([])
     const { api } = useContext(AxiosContext)
     const { store } = storeItems()
-    const token = Cookies.get('jwt')
+    const { token } = useUser()
 
     const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault()
 
-        const storeStatus: StoreStatus = await store(api, cardValue, name, response, sector, token)
+        const storeStatus: StoreStatus = await store(api, cardValue, name, response, sector, token?.value)
         if (storeStatus.success) {
             toast.success(`${storeStatus.message}`)
         }
@@ -179,10 +178,10 @@ const Resource = ({ cardValue }: ResourceProps) => {
 
     const { index } = getItems()
     const { api } = useContext(AxiosContext)
-    const token = Cookies.get('jwt')
+    const { token } = useUser()
 
     const response = async () => {
-        const indexPromise: IndexPromise = await index(api, cardValue, token)
+        const indexPromise: IndexPromise = await index(api, cardValue, token?.value)
 
         if (indexPromise.success) {
             toast.success(`${indexPromise.message}`)
