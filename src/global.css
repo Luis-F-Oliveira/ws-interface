@@ -3,22 +3,8 @@
 @tailwind utilities;
 
 html, body {
-  overflow-x: hidden;
-  background-color: #171717;
   font-family: "Poppins", sans-serif;
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: #fff;
-  border-radius: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background-color: transparent;
+  background: #171717;
 }
  
 @layer base {

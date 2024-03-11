@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { UserProvider } from './context'
 import { App } from './routes'
+import { UserProvider } from './context'
 import './global.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -11,11 +11,3 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </UserProvider>
   </React.StrictMode>,
 )
-
-// Remove Preload scripts loading
-postMessage({ payload: 'removeLoading' }, '*')
-
-// Use contextBridge
-window.ipcRenderer.on('main-process-message', (_event, message) => {
-  console.log(message)
-})

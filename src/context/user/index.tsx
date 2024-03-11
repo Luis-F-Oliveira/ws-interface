@@ -1,19 +1,9 @@
+import { IUser } from '@/@types/User'
 import { ReactNode, createContext, useState, useContext } from 'react'
 
-interface User {
-    id: number
-    name: string
-    email: string
-}
-
-interface Token {
-    value: string
-}
-
 interface UserContextProps {
-    user: User | null
-    token: Token | null
-    loginUser: (userData: User, token: Token) => void
+    user: IUser | null
+    loginUser: (userData: IUser) => void
     logoutUser: () => void
 }
 
@@ -34,33 +24,25 @@ interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps)
 {
-    const [user, setUser] = useState<User | null>(() => {
+    const [user, setUser] = useState<IUser | null>(() => {
         const savedUser = localStorage.getItem('user');
         return savedUser ? JSON.parse(savedUser) : null;
     })
-    const [token, setToken] = useState<Token | null>(() => {
-        const savedToken = localStorage.getItem('jwt');
-        return savedToken ? { value: savedToken } : null;
-    })
 
-    function loginUser(userData: User, token: Token)
+    function loginUser(userData: IUser)
     {
         setUser(userData)
-        setToken(token)
         localStorage.setItem('user', JSON.stringify(userData))
-        localStorage.setItem('jwt', token.value)
     }
 
     function logoutUser()
     {
         setUser(null)
-        setToken(null)
         localStorage.removeItem('user')
-        localStorage.removeItem('jwt')
     }
 
     return (
-        <UserContext.Provider value={{ user, token, loginUser, logoutUser }}>
+        <UserContext.Provider value={{ user, loginUser, logoutUser }}>
             { children }
         </UserContext.Provider>
     )
