@@ -1,5 +1,9 @@
+import { Body } from "@/partials/body"
+
 export const Home = () => {
   return (
-    <div>Home</div>
+    <Body>
+      <h1>Home</h1>
+    </Body>
   )
 }

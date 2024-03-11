@@ -1,5 +1,6 @@
 import { IUser } from '@/@types/User'
 import { ReactNode, createContext, useState, useContext } from 'react'
+import { AxiosContext } from '..'
 
 interface UserContextProps {
     user: IUser | null
@@ -28,6 +29,7 @@ export function UserProvider({ children }: UserProviderProps)
         const savedUser = localStorage.getItem('user');
         return savedUser ? JSON.parse(savedUser) : null;
     })
+    const { api } = useContext(AxiosContext)
 
     function loginUser(userData: IUser)
     {
@@ -38,6 +40,7 @@ export function UserProvider({ children }: UserProviderProps)
     function logoutUser()
     {
         setUser(null)
+        api.post('logout')
         localStorage.removeItem('user')
     }
 
