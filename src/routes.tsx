@@ -4,6 +4,7 @@ import { Login } from './pages/public'
 import 'react-toastify/dist/ReactToastify.css'
 import { PrivateRoute } from './private'
 import { Home } from './pages/private'
+import { Commands, Sectors } from './pages/private/database'
 
 export const App = () => {
   return (
@@ -13,6 +14,16 @@ export const App = () => {
           <Route path='/' element={
             <PrivateRoute>
               <Home />
+            </PrivateRoute>
+          } />
+          <Route path='/commands' element={
+            <PrivateRoute>
+              <Commands />
+            </PrivateRoute>
+          } />
+          <Route path='/sectors' element={
+            <PrivateRoute>
+              <Sectors />
             </PrivateRoute>
           } />
           <Route path='/login' element={<Login />} />

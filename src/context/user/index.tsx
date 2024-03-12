@@ -26,7 +26,7 @@ interface UserProviderProps {
 export function UserProvider({ children }: UserProviderProps)
 {
     const [user, setUser] = useState<IUser | null>(() => {
-        const savedUser = localStorage.getItem('user');
+        const savedUser = sessionStorage.getItem('user');
         return savedUser ? JSON.parse(savedUser) : null;
     })
     const { api } = useContext(AxiosContext)
@@ -34,14 +34,14 @@ export function UserProvider({ children }: UserProviderProps)
     function loginUser(userData: IUser)
     {
         setUser(userData)
-        localStorage.setItem('user', JSON.stringify(userData))
+        sessionStorage.setItem('user', JSON.stringify(userData))
     }
 
     function logoutUser()
     {
         setUser(null)
         api.post('logout')
-        localStorage.removeItem('user')
+        sessionStorage.removeItem('user')
     }
 
     return (

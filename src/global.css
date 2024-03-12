@@ -5,6 +5,20 @@
 html, body {
   font-family: "Poppins", sans-serif;
   background: #171717;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #fff;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
 }
  
 @layer base {
