@@ -65,7 +65,7 @@ export function Sidebar() {
                         <DropdownMenuLabel>Banco de Dados</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
-                            <Link href={'/dashboard/databases/commands'}>
+                            <Link href={'/dashboard/databases/commands?action=show'}>
                                 Comandos
                             </Link>
                         </DropdownMenuItem>
