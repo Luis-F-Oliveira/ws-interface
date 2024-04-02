@@ -17,6 +17,22 @@ import {
 } from "@/components/ui/tooltip"
 import { Database, MessagesSquare, PieChart } from "lucide-react"
 import Link from "next/link"
+import Cookie from 'js-cookie'
+import { useContext } from "react"
+import AxiosContext from "@/context/axios"
+import { useRouter } from "next/navigation"
+
+function Logout() {
+    const { api } = useContext(AxiosContext)
+    const router = useRouter()
+    const handleLogout = async () => {
+        Cookie.remove('auth-user')
+        await api.post('logout')
+        router.refresh()
+    }
+
+    return <Button onClick={handleLogout} variant={'destructive'}>Sair</Button>
+}
 
 export function Sidebar() {
     return (
@@ -75,9 +91,7 @@ export function Sidebar() {
                 </DropdownMenu>
             </nav>
             <footer className='h-16 flex justify-center items-center'>
-                <Button variant={'destructive'}>
-                    Sair
-                </Button>
+                <Logout />
             </footer>
         </div>
     )
