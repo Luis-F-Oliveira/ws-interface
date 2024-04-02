@@ -11,6 +11,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
 
 interface RootLayoutProps {
@@ -23,9 +24,9 @@ export default function DashboardLayout({
     const pathname = usePathname()
     const parts = pathname.split('/').filter(part => part !== '')
     return (
-        <main className='flex gap-4'>
+        <main className='flex gap-3'>
             <Sidebar />
-            <section className='mt-3 flex flex-col gap-4'>
+            <section className='my-3 mr-3 flex flex-col gap-2 w-full'>
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
@@ -49,7 +50,11 @@ export default function DashboardLayout({
                         })}
                     </BreadcrumbList>
                 </Breadcrumb>
-                {children}
+                <Card className='h-full'>
+                    <CardContent className='py-3'>
+                        {children}
+                    </CardContent>
+                </Card>
             </section>
         </main>
     )

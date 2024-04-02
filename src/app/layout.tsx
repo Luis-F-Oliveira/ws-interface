@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-200 overflow-hidden`}>
+      <body className={`${inter.className} bg-slate-200 text-black overflow-hidden`}>
         {children}
         <Toaster />
       </body>

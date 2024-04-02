@@ -25,7 +25,9 @@ export function Sidebar() {
                 className='w-full h-20 flex justify-center items-center 
             border-b-2 mb-4'
             >
-                <h1>Logo</h1>
+                <Link href={'/dashboard'}>
+                    <PieChart size={26} />
+                </Link>
             </header>
             <nav className='h-full flex flex-col items-center gap-3'>
                 <TooltipProvider>
@@ -43,7 +45,7 @@ export function Sidebar() {
                     </Tooltip>
                 </TooltipProvider>
 
-                <DropdownMenu>
+                {/* <DropdownMenu>
                     <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
                         <PieChart />
                     </DropdownMenuTrigger>
@@ -55,7 +57,7 @@ export function Sidebar() {
                         <DropdownMenuItem>Team</DropdownMenuItem>
                         <DropdownMenuItem>Subscription</DropdownMenuItem>
                     </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
 
                 <DropdownMenu>
                     <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
