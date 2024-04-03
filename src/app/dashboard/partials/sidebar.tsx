@@ -18,12 +18,10 @@ import {
 import { Database, MessagesSquare, PieChart } from "lucide-react"
 import Link from "next/link"
 import Cookie from 'js-cookie'
-import { useContext } from "react"
-import AxiosContext from "@/context/axios"
 import { useRouter } from "next/navigation"
+import { api } from "@/services/axios"
 
 function Logout() {
-    const { api } = useContext(AxiosContext)
     const router = useRouter()
     const handleLogout = async () => {
         Cookie.remove('auth-user')

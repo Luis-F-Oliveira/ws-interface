@@ -1,17 +1,43 @@
-import { AxiosInstance } from "axios"
+import { api } from "../axios"
 
-interface IServices {
+export interface serviceCommandsProps {
     success: boolean
     message?: string
+    data?: IData[]
 }
 
-export function CommandsService() {
-    function index(
+export interface IData {
+    id: number
+    name: string
+    return: string
+    parent_id: number | null
+    sector_id: number
+    sector: Sector
+    replies?: IData[]
+}
 
-    ): Promise<IServices> {
-        return new Promise((resolve, reject) => {
+interface Sector {
+    id: number
+    name: string
+}
 
+export class serviceCommands {
+    index(): Promise<serviceCommandsProps> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await api.get('commands');
+                resolve({ success: true, data: response.data })
+            } catch (error) {
+                reject({ success: false, message: "erro ao coletar dados" })
+            }
         })
     }
-    return {}
+
+    store() { }
+
+    show() { }
+
+    update() { }
+
+    delete() { }
 }
