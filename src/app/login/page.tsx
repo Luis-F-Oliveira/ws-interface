@@ -5,14 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
-import AxiosContext from "@/context/axios"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation"
-import { useContext } from "react"
 import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { UserRound } from 'lucide-react'
 import Cookie from 'js-cookie'
+import { api } from "@/services/axios"
 
 const formSchema = z.object({
   email: z.string().min(1, {
@@ -25,7 +24,6 @@ const formSchema = z.object({
 
 export default function Page() {
   const router = useRouter()
-  const { api } = useContext(AxiosContext)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

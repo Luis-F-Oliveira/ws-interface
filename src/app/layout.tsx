@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ReactNode } from "react"
+import { ReactNode, useState } from "react"
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
+import { cookies } from "next/headers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -16,9 +17,15 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const cookieStore = cookies()
+  const theme = cookieStore.get('theme')
+
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-200 text-black overflow-hidden`}>
+      <body 
+        className={`${inter.className} text-black overflow-hidden
+        ${theme?.value === 'light' ? 'bg-slate-200' : 'dark'}`}
+      >
         {children}
         <Toaster />
       </body>

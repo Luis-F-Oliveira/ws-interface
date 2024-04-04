@@ -34,13 +34,16 @@ function Logout() {
 
 export function Sidebar() {
     return (
-        <div className='w-20 h-screen bg-gray-100 shadow-md flex flex-col'>
+        <div
+            className='w-20 h-screen bg-gray-100 dark:bg-neutral-950 shadow-md flex flex-col
+            dark:border-r'
+        >
             <header
                 className='w-full h-20 flex justify-center items-center 
             border-b-2 mb-4'
             >
                 <Link href={'/dashboard'}>
-                    <PieChart size={26} />
+                    <PieChart size={26} className='dark:text-white' />
                 </Link>
             </header>
             <nav className='h-full flex flex-col items-center gap-3'>
@@ -49,7 +52,7 @@ export function Sidebar() {
                         <div className='relative'>
                             <Link href='/dashboard/messages'>
                                 <TooltipTrigger className='p-2 rounded-md shadow-md'>
-                                    <MessagesSquare />
+                                    <MessagesSquare className='dark:text-white' />
                                 </TooltipTrigger>
                             </Link>
                             <TooltipContent className='absolute left-7 top-3 text-nowrap bg-white text-black'>
@@ -75,7 +78,7 @@ export function Sidebar() {
 
                 <DropdownMenu>
                     <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
-                        <Database />
+                        <Database className='dark:text-white' />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>Banco de Dados</DropdownMenuLabel>
