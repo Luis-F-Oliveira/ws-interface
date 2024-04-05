@@ -7,10 +7,10 @@ export function Theme() {
     const router = useRouter()
 
     const handleTheme = () => {
-        if (theme === 'dark') {
-            Cookie.set('theme', 'light')
-        } else {
+        if (theme === 'light') {
             Cookie.set('theme', 'dark')
+        } else {
+            Cookie.set('theme', 'light')
         }
 
         router.refresh()
