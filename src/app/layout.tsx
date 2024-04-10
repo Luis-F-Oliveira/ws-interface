@@ -23,8 +23,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body 
-        className={`${inter.className} text-black overflow-hidden
-        ${theme?.value === 'light' ? 'bg-slate-200' : 'dark'}`}
+        className={`${inter.className} overflow-hidden
+        ${theme?.value === 'light' ? 'bg-slate-200 text-black' : 'dark'}`}
       >
         {children}
         <Toaster />

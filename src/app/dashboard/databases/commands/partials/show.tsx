@@ -13,21 +13,29 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-import { Card } from '@/components/ui/card'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 
 const formSchema = z.object({
   perPage: z.number()
+})
+
+const searchSchema = z.object({
+  search: z.string()
 })
 
 interface ShowProps { }
 
 interface FormProps {
   onPerPageChange: (perPage: number) => void
+}
+
+interface SearchProps {
+  onSearch: (searchTerm: string) => void
 }
 
 interface ShowState {
@@ -37,11 +45,33 @@ interface ShowState {
   perPage: number
   currentPage: number
   pageCount: number
+  searchTerm: string
 }
 
-const SearchComponent = () => {
+const SearchComponent = ({ onSearch }: SearchProps) => {
+  const form = useForm<z.infer<typeof searchSchema>>({
+    resolver: zodResolver(searchSchema)
+  })
+
   return (
-    <h1>Search</h1>
+    <Form {...form}>
+      <form>
+        <FormField
+          control={form.control}
+          name='search'
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  placeholder='Pesquisar por nome'
+                  onChange={(event) => onSearch(event.target.value)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   )
 }
 
@@ -93,7 +123,8 @@ export default class Show extends React.Component<ShowProps, ShowState> {
       elements: [],
       perPage: 8,
       currentPage: 0,
-      pageCount: 0
+      pageCount: 0,
+      searchTerm: ""
     }
   }
 
@@ -104,13 +135,20 @@ export default class Show extends React.Component<ShowProps, ShowState> {
   async fetchCommands() {
     const commandsServices = new serviceCommands()
     const response: serviceCommandsProps = await commandsServices.index()
+    let filteredData = response.data || []
 
-    if (response.success && response.data) {
-      this.setState({
-        data: response.data,
-        pageCount: Math.ceil(this.state.data.length / this.state.perPage),
-      }, () => this.setElementsForCurrentpage())
+    if (this.state.searchTerm) {
+      filteredData = filteredData.filter((item) => 
+        item.name.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+      )
     }
+
+    this.setState(
+      {
+        data: filteredData,
+        pageCount: Math.ceil(filteredData.length / this.state.perPage),
+      }, () => this.setElementsForCurrentpage()
+    )
   }
 
   setElementsForCurrentpage() {
@@ -120,7 +158,7 @@ export default class Show extends React.Component<ShowProps, ShowState> {
         return (
           <TableRow key={index}>
             <TableCell>
-              <Link href={'/'}>
+              <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
                 <SquareMousePointer />
               </Link>
             </TableCell>
@@ -150,10 +188,16 @@ export default class Show extends React.Component<ShowProps, ShowState> {
     this.setState({ perPage }, () => {
       this.setElementsForCurrentpage()
     })
-  };
+  }
+
+  handleSearch = (searchTerm: string) => {
+    this.setState({ searchTerm }, () => {
+      this.fetchCommands()
+    })
+  }
 
   render() {
-    let paginationElement
+    let paginationElement: React.ReactNode
     paginationElement = (
       <Pagination className='mt-3'>
         <PaginationContent>
@@ -194,9 +238,7 @@ export default class Show extends React.Component<ShowProps, ShowState> {
             </Link>
             <FormComponent onPerPageChange={this.handlePerPageChange} />
           </div>
-          <Card className='p-2'>
-            <SearchComponent />
-          </Card>
+          <SearchComponent onSearch={this.handleSearch} />
         </div>
         <div className='flex flex-col justify-end'>
           <div>
