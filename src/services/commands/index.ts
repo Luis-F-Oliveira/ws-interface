@@ -25,7 +25,7 @@ export class serviceCommands {
     index(): Promise<serviceCommandsProps> {
         return new Promise(async (resolve, reject) => {
             try {
-                const response = await api.get('commands');
+                const response = await api.get('commands')
                 resolve({ success: true, data: response.data })
             } catch (error) {
                 reject({ success: false, message: "erro ao coletar dados" })
@@ -35,7 +35,16 @@ export class serviceCommands {
 
     store() { }
 
-    show() { }
+    show(id: string | null): Promise<serviceCommandsProps> { 
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await api.get(`commands/${id}`)
+                resolve({ success: true, data: response.data })
+            } catch {
+                reject({ success: false, message: "erro ao coletar dados" })
+            }
+        })
+    }
 
     update() { }
 
