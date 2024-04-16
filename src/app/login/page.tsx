@@ -12,6 +12,7 @@ import { z } from 'zod'
 import { UserRound } from 'lucide-react'
 import Cookie from 'js-cookie'
 import { api } from "@/services/axios"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const formSchema = z.object({
   email: z.string().min(1, {
@@ -19,8 +20,20 @@ const formSchema = z.object({
   }),
   password: z.string().min(1, {
     'message': "Senha deve ser preenchida!"
-  })
+  }),
+  items: z.array(z.string()).refine((value) => value.some((item) => item)).optional()
 })
+
+const items = [
+  {
+    id: "conect",
+    label: "Mantenha-me conectado"
+  }
+]
+
+interface ResponseData {
+  permanent: boolean
+}
 
 export default function Page() {
   const router = useRouter()
@@ -37,11 +50,17 @@ export default function Page() {
     await api.post('login', values)
       .then((response) => {
         if (response.status === 200) {
+          const responseData: ResponseData = response.data
           toast({
             title: "Bem vindo",
             description: "Você foi autenticado com sucesso"
           })
-          Cookie.set('auth-user', 'Authenticate')
+          if (responseData.permanent) {
+            Cookie.set('auth-user', 'Authenticate')
+          } else {
+            const oneDayInSeconds = 60 * 60 * 24
+            Cookie.set('auth-user', 'Authenticate', { expires: oneDayInSeconds })
+          }
           router.push('/dashboard')
         }
       })
@@ -89,6 +108,49 @@ export default function Page() {
                     <FormControl>
                       <Input type="password" placeholder="******" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="items"
+                render={() => (
+                  <FormItem>
+                    {items.map((item) => (
+                      <FormField
+                        key={item.id}
+                        control={form.control}
+                        name="items"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={item.id}
+                              className="flex flex-row items-start space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(item.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (Array.isArray(field.value)) {
+                                      const updatedValue = checked
+                                        ? [...field.value, item.id]
+                                        : field.value.filter((value) => value !== item.id);
+                                      field.onChange(updatedValue);
+                                    } else {
+                                      field.onChange(checked ? [item.id] : []);
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {item.label}
+                              </FormLabel>
+                            </FormItem>
+                          )
+                        }}
+                      />
+                    ))}
                     <FormMessage />
                   </FormItem>
                 )}
