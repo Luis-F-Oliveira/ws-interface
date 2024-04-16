@@ -11,6 +11,18 @@ import Link from 'next/link'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from '@/components/ui/use-toast'
 
 interface HandleProps {
   id: string | null
@@ -20,7 +32,7 @@ interface HandleState {
   data: IData[] | null
   folders: React.ReactNode
   formsOpen: boolean
-  forms: React.ReactNode
+  formsData: IData[] | null
 }
 
 interface FoldersProps {
@@ -31,25 +43,47 @@ interface FoldersProps {
 }
 
 interface FormsProps {
-  id: number
+  data: IData[] | null
+  ifDelete: () => void
 }
 
 const formSchema = z.object({
-  name: z.string(),
-  return: z.string()
+  name: z.string().min(1),
+  return: z.string().min(1),
+  parent_id: z.string().nullable(),
+  sector_id: z.string()
 })
 
-const Forms: React.FC<FormsProps> = ({ id }) => {
+const Forms: React.FC<FormsProps> = ({ data, ifDelete }) => {
+  const { toast } = useToast()
+  const parentId = data?.[0]?.parent_id ? data?.[0]?.parent_id.toString() : null
+  const sectorId: string = (data?.[0]?.sector_id ?? '').toString()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      return: ""
+      name: data?.[0]?.name || "",
+      return: data?.[0]?.return || "",
+      parent_id: parentId || null,
+      sector_id: sectorId || ""
+
     }
   })
 
+  React.useEffect(() => {
+    form.reset({
+      name: data?.[0]?.name || "",
+      return: data?.[0]?.return || "",
+      parent_id: parentId,
+      sector_id: sectorId || ""
+    })
+  }, [data])
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values)
+  }
+
+  const deleting = async () => {
+    ifDelete()
   }
 
   return (
@@ -65,7 +99,8 @@ const Forms: React.FC<FormsProps> = ({ id }) => {
                 <Input {...field} />
               </FormControl>
               <FormDescription>
-                Descrição do que é nome
+                O nome é o campo que será mostrado para a identificação da pergunta, exemplo:
+                "N° Lorem, ipsum dolor sit amet consectetur adipisicing elit."
               </FormDescription>
             </FormItem>
           )}
@@ -77,17 +112,52 @@ const Forms: React.FC<FormsProps> = ({ id }) => {
             <FormItem>
               <FormLabel>Resposta</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea className='h-32' {...field} />
               </FormControl>
               <FormDescription>
-                Descrição da resposta
+                Caso esse comando tenha um subcomando, não é necessário a criação de uma listagem nesse campo
+                o própio bot desenvolverá a lista automáticamente.
               </FormDescription>
             </FormItem>
           )}
         />
-        <Button type='submit'>
-          Atualizar
-        </Button>
+        <div className='flex justify-between '>
+          <div className='space-x-2'>
+            <Button type='submit'>
+              Atualizar
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  type='button'
+                  variant={'destructive'}
+                >
+                  Apagar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Realmente deseja apagar?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Essa ação não pode ser desfeita. Isso irá excluir permanentemente o comando e
+                    remover seus dados dos nossos servidores.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={deleting}>Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+          <Button
+            type='button'
+            variant={'link'}
+            onClick={() => toast({ title: "SubComando criado!", description: "SubComando criado com o nome de ..." })}
+          >
+            Adicionar Sub
+          </Button>
+        </div>
       </form>
     </Form>
   )
@@ -125,7 +195,7 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
       data: null,
       folders: [],
       formsOpen: false,
-      forms: []
+      formsData: null
     }
   }
 
@@ -163,9 +233,11 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
               {data.map(item => (
                 <div key={item.id}>
                   <div className='cursor-pointer font-bold'>
-                    <span>
-                      Comando {item.sector.name}
-                    </span>
+                    {item.sector?.name ? (
+                      <span>
+                        Comando {item.sector.name}
+                      </span>
+                    ) : null}
                   </div>
                   <Folders
                     data={data}
@@ -185,16 +257,23 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
     }
   }
 
-  setFormsInPage(id: number) {
-    console.log('form');
-    
-    let forms = (
-      <Forms id={id} />
-    )
+  setFormsInPage = async (id: number) => {
+    const commandsServices = new serviceCommands()
+    const response: serviceCommandsProps = await commandsServices.show(id.toString())
 
+    if (response.data) {
+      const dataArray = Array.isArray(response.data) ? response.data : [response.data]
+      this.setState({
+        formsOpen: true,
+        formsData: dataArray
+      })
+    }
+  }
+
+  ifDelete = () => {
     this.setState({
-      formsOpen: true,
-      forms: forms
+      formsData: null,
+      formsOpen: false
     })
   }
 
@@ -204,7 +283,11 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
         {this.state.folders}
         <Card className='w-full border-0'>
           <CardContent className='w-full h-full flex justify-center items-center'>
-            {this.state.formsOpen ? <Forms id={1} /> : <BlocksLoading />}
+            {this.state.formsOpen && this.state.formsData ? (
+              <Forms data={this.state.formsData} ifDelete={this.ifDelete} />
+            ) : (
+              <BlocksLoading />
+            )}
           </CardContent>
         </Card>
       </div>

@@ -12,7 +12,7 @@ export interface IData {
     return: string
     parent_id: number | null
     sector_id: number
-    sector: Sector
+    sector?: Sector
     replies?: IData[]
 }
 
@@ -33,9 +33,25 @@ export class serviceCommands {
         })
     }
 
-    store() { }
+    store(parent_id: string | null, sector_id: string): Promise<serviceCommandsProps> {
+        return new Promise((resolve, reject) => {
+            try {
+                const values = {
+                    name: "Comando",
+                    return: "Resposta",
+                    parent_id: parent_id,
+                    sector_id: sector_id
+                }
 
-    show(id: string | null): Promise<serviceCommandsProps> { 
+                const response = api.post('commands', values)
+                resolve({ success: true })
+            } catch {
+                reject({ success: false })
+            }
+        })
+    }
+
+    show(id: string | null): Promise<serviceCommandsProps> {
         return new Promise(async (resolve, reject) => {
             try {
                 const response = await api.get(`commands/${id}`)
@@ -46,7 +62,25 @@ export class serviceCommands {
         })
     }
 
-    update() { }
+    update(id: string | null, values: IData): Promise<serviceCommandsProps> {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const response = await api.put(`commands/${id}`, values)
+                resolve({ success: true })
+            } catch {
+                reject({ success: false })
+            }
+        })
+    }
 
-    delete() { }
+    delete(id: string | null): Promise<serviceCommandsProps> {
+        return new Promise((resolve, reject) => {
+            try {
+                const response = api.delete(`commands/${id}`)
+                resolve({ success: true })
+            } catch {
+                reject({ success: false })
+            }
+        })
+    }
 }
