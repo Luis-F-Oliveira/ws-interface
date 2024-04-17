@@ -1,13 +1,11 @@
 import BlocksLoading from '@/components/loading/blocks'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { IData, serviceCommands, serviceCommandsProps } from '@/services/commands'
+import { IData, serviceCommands } from '@/services/commands'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { CornerDownRight } from 'lucide-react'
-import Link from 'next/link'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -44,7 +42,7 @@ interface FoldersProps {
 
 interface FormsProps {
   data: IData[] | null
-  ifDelete: () => void
+  handleRefresh: () => void
 }
 
 const formSchema = z.object({
@@ -54,10 +52,12 @@ const formSchema = z.object({
   sector_id: z.string()
 })
 
-const Forms: React.FC<FormsProps> = ({ data, ifDelete }) => {
+const Forms: React.FC<FormsProps> = ({ data, handleRefresh }) => {
   const { toast } = useToast()
+  const api = new serviceCommands()
   const parentId = data?.[0]?.parent_id ? data?.[0]?.parent_id.toString() : null
-  const sectorId: string = (data?.[0]?.sector_id ?? '').toString()
+  const sectorId = (data?.[0]?.sector_id ?? '').toString()
+  const id: string | null = data?.[0]?.id ? data?.[0]?.id.toString() : null
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -78,12 +78,50 @@ const Forms: React.FC<FormsProps> = ({ data, ifDelete }) => {
     })
   }, [data])
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const response = await api.update(id, values)
+
+    if (response.success) {
+      toast({
+        title: "Comando atualizado!"
+      })
+      handleRefresh()
+    } else {
+      toast({
+        title: "Comando não foi atualizado!"
+      })
+    }
+  }
+
+  const subCommand = async () => {
+    const response = await api.store(id, sectorId)
+
+    if (response.success) {
+      toast({
+        title: "SubComando criado!"
+      })
+      handleRefresh()
+    } else {
+      toast({
+        title: "SubComando não foi criado!"
+      })
+    }
   }
 
   const deleting = async () => {
-    ifDelete()
+    const response = await api.delete(id)
+
+    if (response.success) {
+      toast({
+        title: "Comando apagado!"
+      })
+      handleRefresh()
+    } else {
+      toast({
+        title: "Comando não foi apagado!",
+        description: response.message
+      })
+    }
   }
 
   return (
@@ -121,17 +159,14 @@ const Forms: React.FC<FormsProps> = ({ data, ifDelete }) => {
             </FormItem>
           )}
         />
-        <div className='flex justify-between '>
+        <div className='flex justify-between'>
           <div className='space-x-2'>
             <Button type='submit'>
               Atualizar
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  type='button'
-                  variant={'destructive'}
-                >
+                <Button type='button' variant={'destructive'}>
                   Apagar
                 </Button>
               </AlertDialogTrigger>
@@ -144,8 +179,12 @@ const Forms: React.FC<FormsProps> = ({ data, ifDelete }) => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={deleting}>Continue</AlertDialogAction>
+                  <AlertDialogCancel>
+                    Cancelar
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={deleting}>
+                    Continue
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -153,7 +192,7 @@ const Forms: React.FC<FormsProps> = ({ data, ifDelete }) => {
           <Button
             type='button'
             variant={'link'}
-            onClick={() => toast({ title: "SubComando criado!", description: "SubComando criado com o nome de ..." })}
+            onClick={subCommand}
           >
             Adicionar Sub
           </Button>
@@ -205,7 +244,7 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
 
   async fetchComponent() {
     const commandsServices = new serviceCommands()
-    const response: serviceCommandsProps = await commandsServices.show(this.props.id)
+    const response = await commandsServices.show(this.props.id)
 
     if (response.data) {
       const dataArray = Array.isArray(response.data) ? response.data : [response.data]
@@ -219,36 +258,26 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
     const { data } = this.state
     if (data) {
       let folders = (
-        <Card className='w-2/4 border-0'>
-          <CardHeader>
-            <CardTitle>Pastas</CardTitle>
-            <CardDescription>
-              <Link href={'/dashboard/databases?question=commands_folders'}>
-                Informações sobre
-              </Link>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='h-3/4 overflow-y-auto'>
-            <section>
-              {data.map(item => (
-                <div key={item.id}>
-                  <div className='cursor-pointer font-bold'>
-                    {item.sector?.name ? (
-                      <span>
-                        Comando {item.sector.name}
-                      </span>
-                    ) : null}
-                  </div>
-                  <Folders
-                    data={data}
-                    id={this.props.id}
-                    setFormsInPage={this.setFormsInPage}
-                  />
+        <div className='w-1/2 overflow-y-auto'>
+          <section>
+            {data.map(item => (
+              <div key={item.id}>
+                <div className='cursor-pointer font-bold'>
+                  {item.sector?.name ? (
+                    <span className='text-xl'>
+                      Comando {item.sector.name}
+                    </span>
+                  ) : null}
                 </div>
-              ))}
-            </section>
-          </CardContent>
-        </Card >
+                <Folders
+                  data={data}
+                  id={this.props.id}
+                  setFormsInPage={this.setFormsInPage}
+                />
+              </div>
+            ))}
+          </section>
+        </div >
       )
 
       this.setState({
@@ -259,7 +288,7 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
 
   setFormsInPage = async (id: number) => {
     const commandsServices = new serviceCommands()
-    const response: serviceCommandsProps = await commandsServices.show(id.toString())
+    const response = await commandsServices.show(id.toString())
 
     if (response.data) {
       const dataArray = Array.isArray(response.data) ? response.data : [response.data]
@@ -270,7 +299,8 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
     }
   }
 
-  ifDelete = () => {
+  handleRefresh = () => {
+    this.fetchComponent()
     this.setState({
       formsData: null,
       formsOpen: false
@@ -281,15 +311,15 @@ export default class Handle extends React.Component<HandleProps, HandleState> {
     return (
       <div className='h-full flex gap-4'>
         {this.state.folders}
-        <Card className='w-full border-0'>
-          <CardContent className='w-full h-full flex justify-center items-center'>
+        <div className='w-full flex justify-center items-center'>
+          <div className='flex justify-center items-center'>
             {this.state.formsOpen && this.state.formsData ? (
-              <Forms data={this.state.formsData} ifDelete={this.ifDelete} />
+              <Forms data={this.state.formsData} handleRefresh={this.handleRefresh} />
             ) : (
               <BlocksLoading />
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     )
   }

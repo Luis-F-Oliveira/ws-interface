@@ -16,6 +16,13 @@ export interface IData {
     replies?: IData[]
 }
 
+interface IUpdate {
+    name: string;
+    return: string;
+    parent_id: string | null;
+    sector_id: string;
+}
+
 interface Sector {
     id: number
     name: string
@@ -62,25 +69,29 @@ export class serviceCommands {
         })
     }
 
-    update(id: string | null, values: IData): Promise<serviceCommandsProps> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const response = await api.put(`commands/${id}`, values)
+    update(id: string | null, values: IUpdate): Promise<serviceCommandsProps> {
+        return new Promise(async (resolve) => {
+            api.put(`commands/${id}`, values)
+            .then(() => {
                 resolve({ success: true })
-            } catch {
-                reject({ success: false })
-            }
+            })
+            .catch(() => {
+                resolve({ success: false })
+            })
         })
     }
 
     delete(id: string | null): Promise<serviceCommandsProps> {
-        return new Promise((resolve, reject) => {
-            try {
-                const response = api.delete(`commands/${id}`)
-                resolve({ success: true })
-            } catch {
-                reject({ success: false })
-            }
+        return new Promise((resolve) => {
+            api.delete(`commands/${id}`)
+                .then(() => {
+                    resolve({ success: true })
+                })
+                .catch((error) => {
+                    if (error.response.status === 403) {
+                        resolve({ success: false, message: error.response.data.message })
+                    }
+                })
         })
     }
 }

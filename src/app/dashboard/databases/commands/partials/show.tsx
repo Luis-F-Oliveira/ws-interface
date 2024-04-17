@@ -164,7 +164,7 @@ export default class Show extends React.Component<ShowProps, ShowState> {
             </TableCell>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{item.name}</TableCell>
-            <TableCell className="text-right">{item.sector.name}</TableCell>
+            <TableCell className="text-right">{item.sector?.name}</TableCell>
           </TableRow>
         )
       })

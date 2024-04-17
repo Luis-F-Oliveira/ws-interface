@@ -54,7 +54,7 @@ export default function DashboardLayout({
                     </Breadcrumb>
                     <Theme />
                 </div>
-                <Card className='h-full'>
+                <Card className='h-[calc(100vh-8vh)]'>
                     <CardContent className='py-6 h-full'>
                         {children}
                     </CardContent>
