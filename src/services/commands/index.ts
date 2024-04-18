@@ -17,10 +17,9 @@ export interface IData {
 }
 
 interface IUpdate {
-    name: string;
-    return: string;
-    parent_id: string | null;
-    sector_id: string;
+    name: string
+    return: string
+    parent_id: string | null
 }
 
 interface Sector {
@@ -40,21 +39,22 @@ export class serviceCommands {
         })
     }
 
-    store(parent_id: string | null, sector_id: string): Promise<serviceCommandsProps> {
+    store(parent_id: string | null): Promise<serviceCommandsProps> {
         return new Promise((resolve, reject) => {
-            try {
-                const values = {
-                    name: "Comando",
-                    return: "Resposta",
-                    parent_id: parent_id,
-                    sector_id: sector_id
-                }
-
-                const response = api.post('commands', values)
-                resolve({ success: true })
-            } catch {
-                reject({ success: false })
+            const values = {
+                name: "Comando",
+                return: "Resposta",
+                parent_id: parent_id
             }
+
+            api.post('commands', values)
+            .then((response) => {
+                console.log(response)
+                resolve({ success: true })
+            })
+            .catch(() => {
+                reject({ success: false })
+            })
         })
     }
 
@@ -72,12 +72,12 @@ export class serviceCommands {
     update(id: string | null, values: IUpdate): Promise<serviceCommandsProps> {
         return new Promise(async (resolve) => {
             api.put(`commands/${id}`, values)
-            .then(() => {
-                resolve({ success: true })
-            })
-            .catch(() => {
-                resolve({ success: false })
-            })
+                .then(() => {
+                    resolve({ success: true })
+                })
+                .catch(() => {
+                    resolve({ success: false })
+                })
         })
     }
 

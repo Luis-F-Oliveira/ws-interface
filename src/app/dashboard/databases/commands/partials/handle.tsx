@@ -48,23 +48,20 @@ interface FormsProps {
 const formSchema = z.object({
   name: z.string().min(1),
   return: z.string().min(1),
-  parent_id: z.string().nullable(),
-  sector_id: z.string()
+  parent_id: z.string().nullable()
 })
 
 const Forms: React.FC<FormsProps> = ({ data, handleRefresh }) => {
   const { toast } = useToast()
   const api = new serviceCommands()
   const parentId = data?.[0]?.parent_id ? data?.[0]?.parent_id.toString() : null
-  const sectorId = (data?.[0]?.sector_id ?? '').toString()
   const id: string | null = data?.[0]?.id ? data?.[0]?.id.toString() : null
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: data?.[0]?.name || "",
       return: data?.[0]?.return || "",
-      parent_id: parentId || null,
-      sector_id: sectorId || ""
+      parent_id: parentId || null
 
     }
   })
@@ -73,8 +70,7 @@ const Forms: React.FC<FormsProps> = ({ data, handleRefresh }) => {
     form.reset({
       name: data?.[0]?.name || "",
       return: data?.[0]?.return || "",
-      parent_id: parentId,
-      sector_id: sectorId || ""
+      parent_id: parentId
     })
   }, [data])
 
@@ -94,7 +90,7 @@ const Forms: React.FC<FormsProps> = ({ data, handleRefresh }) => {
   }
 
   const subCommand = async () => {
-    const response = await api.store(id, sectorId)
+    const response = await api.store(id)
 
     if (response.success) {
       toast({

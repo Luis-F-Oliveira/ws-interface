@@ -19,6 +19,8 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import { toast } from '@/components/ui/use-toast'
+import BlocksLoading from '@/components/loading/blocks'
 
 const formSchema = z.object({
   perPage: z.number()
@@ -40,7 +42,7 @@ interface SearchProps {
 
 interface ShowState {
   offset: number
-  data: IData[]
+  data: IData[] | null
   elements: React.ReactNode[]
   perPage: number
   currentPage: number
@@ -119,7 +121,7 @@ export default class Show extends React.Component<ShowProps, ShowState> {
     super(props)
     this.state = {
       offset: 0,
-      data: [],
+      data: null,
       elements: [],
       perPage: 8,
       currentPage: 0,
@@ -138,7 +140,7 @@ export default class Show extends React.Component<ShowProps, ShowState> {
     let filteredData = response.data || []
 
     if (this.state.searchTerm) {
-      filteredData = filteredData.filter((item) => 
+      filteredData = filteredData.filter((item) =>
         item.name.toLowerCase().includes(this.state.searchTerm.toLowerCase())
       )
     }
@@ -152,23 +154,25 @@ export default class Show extends React.Component<ShowProps, ShowState> {
   }
 
   setElementsForCurrentpage() {
-    let elements = this.state.data
-      .slice(this.state.offset, this.state.offset + this.state.perPage)
-      .map((item, index) => {
-        return (
-          <TableRow key={index}>
-            <TableCell>
-              <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
-                <SquareMousePointer />
-              </Link>
-            </TableCell>
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>{item.name}</TableCell>
-            <TableCell className="text-right">{item.sector?.name}</TableCell>
-          </TableRow>
-        )
-      })
-    this.setState({ elements: elements })
+    if (this.state.data) {
+      let elements = this.state.data
+        .slice(this.state.offset, this.state.offset + this.state.perPage)
+        .map((item, index) => {
+          return (
+            <TableRow key={index}>
+              <TableCell>
+                <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
+                  <SquareMousePointer />
+                </Link>
+              </TableCell>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell className="text-right">{item.sector?.name}</TableCell>
+            </TableRow>
+          )
+        })
+      this.setState({ elements: elements })
+    }
   }
 
   handlePageClick(isNext: boolean) {
@@ -194,6 +198,18 @@ export default class Show extends React.Component<ShowProps, ShowState> {
     this.setState({ searchTerm }, () => {
       this.fetchCommands()
     })
+  }
+
+  createCommand = async () => {
+    const api = new serviceCommands()
+    const response = await api.store(null)
+
+    if (response.success) {
+      toast({ title: "Novo comando criado!" })
+      this.fetchCommands()
+    } else {
+      toast({ title: "Novo comando não foi criado!" })
+    }
   }
 
   render() {
@@ -228,36 +244,42 @@ export default class Show extends React.Component<ShowProps, ShowState> {
 
     return (
       <div className='h-full'>
-        <h1 className='font-bold text-2xl mb-7'>
-          Tabela de comandos
-        </h1>
-        <div className='mb-5 flex justify-between items-center'>
-          <div className='flex items-center gap-3'>
-            <Link href={'/dashboard/databases/commands?action=store'}>
-              <Plus />
-            </Link>
-            <FormComponent onPerPageChange={this.handlePerPageChange} />
+        {this.state.data ? (
+          <>
+            <h1 className='font-bold text-2xl mb-7'>
+              Tabela de comandos
+            </h1>
+            <div className='mb-5 flex justify-between items-center'>
+              <div className='flex items-center gap-3'>
+                <Plus className='cursor-pointer' onClick={this.createCommand} />
+                <FormComponent onPerPageChange={this.handlePerPageChange} />
+              </div>
+              <SearchComponent onSearch={this.handleSearch} />
+            </div>
+            <div className='flex flex-col justify-end'>
+              <div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[10px]"></TableHead>
+                      <TableHead>#</TableHead>
+                      <TableHead>Nome</TableHead>
+                      <TableHead className="text-right">Setor</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {this.state.elements}
+                  </TableBody>
+                </Table>
+                {paginationElement}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className='h-full flex justify-center'>
+            <BlocksLoading />
           </div>
-          <SearchComponent onSearch={this.handleSearch} />
-        </div>
-        <div className='flex flex-col justify-end'>
-          <div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[10px]"></TableHead>
-                  <TableHead>#</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead className="text-right">Setor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {this.state.elements}
-              </TableBody>
-            </Table>
-            {paginationElement}
-          </div>
-        </div>
+        )}
       </div>
     )
   }

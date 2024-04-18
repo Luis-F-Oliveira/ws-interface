@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import { ReactNode, useState } from "react"
+import { ReactNode } from "react"
 import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 import { cookies } from "next/headers"

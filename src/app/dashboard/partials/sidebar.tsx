@@ -55,14 +55,14 @@ export function Sidebar() {
                                     <MessagesSquare className='dark:text-white' />
                                 </TooltipTrigger>
                             </Link>
-                            <TooltipContent className='absolute left-7 top-3 text-nowrap bg-white text-black'>
+                            <TooltipContent className='absolute left-7 top-3 text-nowrap'>
                                 <p>Mensagens</p>
                             </TooltipContent>
                         </div>
                     </Tooltip>
                 </TooltipProvider>
 
-                {/* <DropdownMenu>
+                <DropdownMenu>
                     <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
                         <PieChart />
                     </DropdownMenuTrigger>
@@ -74,7 +74,7 @@ export function Sidebar() {
                         <DropdownMenuItem>Team</DropdownMenuItem>
                         <DropdownMenuItem>Subscription</DropdownMenuItem>
                     </DropdownMenuContent>
-                </DropdownMenu> */}
+                </DropdownMenu>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
@@ -86,6 +86,11 @@ export function Sidebar() {
                         <DropdownMenuItem>
                             <Link href={'/dashboard/databases/commands?action=show'}>
                                 Comandos
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                            <Link href={'/dashboard/databases/sectors?action=index'}>
+                                Setores
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
