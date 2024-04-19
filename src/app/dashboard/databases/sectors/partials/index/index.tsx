@@ -161,7 +161,7 @@ export default class Show extends React.Component<ShowProps, ShowState> {
                     return (
                         <TableRow key={index}>
                             <TableCell>
-                                <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
+                                <Link href={`/dashboard/databases/sectors?action=handle&id=${item.id}`}>
                                     <SquareMousePointer />
                                 </Link>
                             </TableCell>
