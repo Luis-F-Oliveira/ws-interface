@@ -13,6 +13,7 @@ import { UserRound } from 'lucide-react'
 import Cookie from 'js-cookie'
 import { api } from "@/services/axios"
 import { Checkbox } from "@/components/ui/checkbox"
+import { IUser, useUser } from "@/context/userContext"
 
 const formSchema = z.object({
   email: z.string().min(1, {
@@ -33,10 +34,12 @@ const items = [
 
 interface ResponseData {
   permanent: boolean
+  user: IUser
 }
 
 export default function Page() {
   const router = useRouter()
+  const { loginUser } = useUser()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,6 +64,7 @@ export default function Page() {
             const oneDayInSeconds = 60 * 60 * 24
             Cookie.set('auth-user', 'Authenticate', { expires: oneDayInSeconds })
           }
+          loginUser(responseData.user)
           router.push('/dashboard')
         }
       })
