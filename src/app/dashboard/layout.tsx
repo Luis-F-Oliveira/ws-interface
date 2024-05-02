@@ -11,7 +11,6 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Theme } from "./partials/theme"
 import { UserProvider } from "@/context/userContext"
 
@@ -56,11 +55,7 @@ export default function DashboardLayout({
                         </Breadcrumb>
                         <Theme />
                     </div>
-                    <Card className='h-[calc(100vh-8vh)]'>
-                        <CardContent className='py-6 h-full'>
-                            {children}
-                        </CardContent>
-                    </Card>
+                    {children}
                 </section>
             </main>
         </UserProvider>

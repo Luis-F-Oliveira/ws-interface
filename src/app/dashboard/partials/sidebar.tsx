@@ -15,11 +15,12 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { Database, MessagesSquare, PieChart } from "lucide-react"
+import { Database, MessagesSquare, PieChart, Shield } from "lucide-react"
 import Link from "next/link"
 import Cookie from 'js-cookie'
 import { useRouter } from "next/navigation"
 import { api } from "@/services/axios"
+import React from "react"
 
 function Logout() {
     const router = useRouter()
@@ -33,6 +34,16 @@ function Logout() {
 }
 
 export function Sidebar() {
+    const [access, setAcess] = React.useState<string>('')
+
+    React.useEffect(() => {
+        api.get('access')
+            .then((response) => {
+                const { name } = response.data
+                setAcess(name)
+            })
+    }, [])
+
     return (
         <div
             className='w-20 h-screen bg-gray-100 dark:bg-neutral-950 shadow-md flex flex-col
@@ -62,6 +73,33 @@ export function Sidebar() {
                     </Tooltip>
                 </TooltipProvider>
 
+                {access === 'admin' ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
+                            <Shield />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuLabel>Admin</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>
+                                <Link href='/dashboard/admin/accounts'>
+                                    Contas
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Link href='/dashboard/admin/sectors'>
+                                    Setores
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Link href='/dashboard/admin/accesses'>
+                                    Acessos
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : null}
+
                 <DropdownMenu>
                     <DropdownMenuTrigger className='p-2 rounded-md shadow-md'>
                         <PieChart />
@@ -85,12 +123,7 @@ export function Sidebar() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
                             <Link href={'/dashboard/databases/commands?action=show'}>
-                                Comandos
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                            <Link href={'/dashboard/databases/sectors?action=index'}>
-                                Setores
+                                Perguntas
                             </Link>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
