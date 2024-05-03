@@ -39,8 +39,8 @@ export function Sidebar() {
     React.useEffect(() => {
         api.get('access')
             .then((response) => {
-                const { name } = response.data
-                setAcess(name)
+                const { access } = response.data
+                setAcess(access)
             })
     }, [])
 

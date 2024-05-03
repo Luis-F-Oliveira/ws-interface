@@ -21,6 +21,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/use-toast'
 import BlocksLoading from '@/components/loading/blocks'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu"
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 
 const formSchema = z.object({
   perPage: z.number()
@@ -30,7 +37,10 @@ const searchSchema = z.object({
   search: z.string()
 })
 
-interface ShowProps { }
+interface ShowProps {
+  commandId: string | null
+  router: AppRouterInstance
+}
 
 interface FormProps {
   onPerPageChange: (perPage: number) => void
@@ -61,7 +71,7 @@ const SearchComponent = ({ onSearch }: SearchProps) => {
         <FormField
           control={form.control}
           name='search'
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormControl>
                 <Input
@@ -136,43 +146,103 @@ export default class Show extends React.Component<ShowProps, ShowState> {
 
   async fetchCommands() {
     const commandsServices = new serviceCommands()
-    const response: serviceCommandsProps = await commandsServices.index()
-    let filteredData = response.data || []
 
-    if (this.state.searchTerm) {
-      filteredData = filteredData.filter((item) =>
-        item.name.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+    let filteredData: IData[] = []
+
+    try {
+      let response: serviceCommandsProps
+      if (this.props.commandId) {
+        response = await commandsServices.show(this.props.commandId)
+      } else {
+        response = await commandsServices.index()
+      }
+
+      if (response.data != null) {
+        filteredData = Array.isArray(response.data) ? response.data : [response.data]
+      }
+
+      if (this.state.searchTerm) {
+        filteredData = filteredData.filter(item =>
+          item.name.toLowerCase().includes(this.state.searchTerm.toLowerCase())
+        )
+      }
+
+      const { perPage } = this.state
+      const pageCount = Math.ceil(filteredData.length / perPage)
+
+      this.setState(
+        {
+          data: filteredData,
+          pageCount
+        },
+        () => this.setElementsForCurrentpage()
       )
+    } catch (error) {
+      console.error('Erro ao buscar comandos:', error)
     }
-
-    this.setState(
-      {
-        data: filteredData,
-        pageCount: Math.ceil(filteredData.length / this.state.perPage),
-      }, () => this.setElementsForCurrentpage()
-    )
   }
+
+
 
   setElementsForCurrentpage() {
     if (this.state.data) {
-      let elements = this.state.data
-        .slice(this.state.offset, this.state.offset + this.state.perPage)
-        .map((item, index) => {
-          return (
-            <TableRow key={index}>
-              <TableCell>
-                <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
-                  <SquareMousePointer />
-                </Link>
-              </TableCell>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.name}</TableCell>
-              <TableCell className="text-right">{item.sector?.name}</TableCell>
-            </TableRow>
-          )
-        })
-      this.setState({ elements: elements })
+      let elements: JSX.Element[] = []
+
+      if (this.props.commandId) {
+        elements = this.state.data
+          .map((item) => this.renderReplies(item))
+          .flat()
+      } else {
+        elements = this.state.data
+          .slice(this.state.offset, this.state.offset + this.state.perPage)
+          .map((item, index) => {
+            return (
+              <TableRow key={index}>
+                <TableCell>
+                  <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
+                    <SquareMousePointer />
+                  </Link>
+                </TableCell>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell className="text-right">{item.sector?.name}</TableCell>
+              </TableRow>
+            )
+          })
+      }
+
+      this.setState({ elements })
     }
+  }
+
+  renderReplies(item: IData): JSX.Element[] {
+    const renderTableRow = (item: IData, index: number): JSX.Element => {
+      return (
+        <TableRow key={item.id}>
+          <TableCell>
+            <Link href={`/dashboard/databases/commands?action=handle&id=${item.id}`}>
+              <SquareMousePointer />
+            </Link>
+          </TableCell>
+          <TableCell>{index + 1}</TableCell>
+          <TableCell>{item.name}</TableCell>
+          <TableCell className="text-right">{item.sector?.name}</TableCell>
+        </TableRow>
+      )
+    }
+
+    const renderRepliesRecursive = (replies: IData[] | undefined): JSX.Element[] => {
+      if (!replies) return []
+
+      return replies.flatMap((reply, index) => {
+        return [
+          renderTableRow(reply, index),
+          ...renderRepliesRecursive(reply.replies)
+        ]
+      })
+    }
+
+    return renderRepliesRecursive(item.replies)
   }
 
   handlePageClick(isNext: boolean) {
@@ -182,9 +252,9 @@ export default class Show extends React.Component<ShowProps, ShowState> {
     } else {
       newPage = Math.max(this.state.currentPage - 1, 0)
     }
-    const newOffset = newPage * this.state.perPage;
+    const newOffset = newPage * this.state.perPage
     this.setState({ currentPage: newPage, offset: newOffset }, () => {
-      this.setElementsForCurrentpage();
+      this.setElementsForCurrentpage()
     })
   }
 
@@ -243,44 +313,62 @@ export default class Show extends React.Component<ShowProps, ShowState> {
     )
 
     return (
-      <div className='h-full'>
-        {this.state.data ? (
-          <>
-            <h1 className='font-bold text-2xl mb-7'>
-              Tabela de comandos
-            </h1>
-            <div className='mb-5 flex justify-between items-center'>
-              <div className='flex items-center gap-3'>
-                <Plus className='cursor-pointer' onClick={this.createCommand} />
-                <FormComponent onPerPageChange={this.handlePerPageChange} />
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div className='h-screen'>
+            {this.state.data ? (
+              <>
+                <h1 className='font-bold text-2xl mb-7'>
+                  Tabela de comandos
+                </h1>
+                <div className='mb-5 flex justify-between items-center'>
+                  <div className='flex items-center gap-3'>
+                    {this.props.commandId ? null : <Plus className='cursor-pointer' onClick={this.createCommand} />}
+                    <FormComponent onPerPageChange={this.handlePerPageChange} />
+                  </div>
+                  <SearchComponent onSearch={this.handleSearch} />
+                </div>
+                <div className='flex flex-col justify-end'>
+                  <div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[10px]"></TableHead>
+                          <TableHead>#</TableHead>
+                          <TableHead>Nome</TableHead>
+                          <TableHead className="text-right">Setor</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {this.state.elements}
+                      </TableBody>
+                    </Table>
+                    {paginationElement}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className='h-full flex justify-center'>
+                <BlocksLoading />
               </div>
-              <SearchComponent onSearch={this.handleSearch} />
-            </div>
-            <div className='flex flex-col justify-end'>
-              <div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[10px]"></TableHead>
-                      <TableHead>#</TableHead>
-                      <TableHead>Nome</TableHead>
-                      <TableHead className="text-right">Setor</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {this.state.elements}
-                  </TableBody>
-                </Table>
-                {paginationElement}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className='h-full flex justify-center'>
-            <BlocksLoading />
+            )}
           </div>
-        )}
-      </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem
+            className='cursor-pointer'
+            onClick={() => this.props.router.back()}
+          >
+            Voltar
+          </ContextMenuItem>
+          <ContextMenuItem
+            className='cursor-pointer'
+            onClick={() => this.props.router.refresh()}
+          >
+            Atualizar
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     )
   }
 }
