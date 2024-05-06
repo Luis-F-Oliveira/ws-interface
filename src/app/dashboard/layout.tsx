@@ -25,7 +25,7 @@ export default function DashboardLayout({
     return (
         <main className='relative flex gap-3'>
             <Sidebar />
-            <section className='my-3 mr-2 flex flex-col gap-2 w-full overflow-y-auto pr-1'>
+            <section className='my-3 mr-2 flex flex-col gap-2 w-full overflow-y-auto px-2'>
                 <div className='flex justify-between items-center'>
                     <Breadcrumb>
                         <BreadcrumbList>

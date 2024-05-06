@@ -52,9 +52,9 @@ function HandleTheme() {
     return (
         <div>
             {theme === 'dark' ? (
-                <Moon onClick={handleThemeChange} className='cursor-pointer' size={20} />
-            ) : (
                 <Sun onClick={handleThemeChange} className='cursor-pointer' size={20} />
+            ) : (
+                <Moon onClick={handleThemeChange} className='cursor-pointer' size={20} />
             )}
         </div>
     )
