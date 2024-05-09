@@ -122,7 +122,7 @@ export function Sidebar() {
                         <DropdownMenuLabel>Banco de Dados</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>
-                            <Link href={'/dashboard/databases/commands?action=show'}>
+                            <Link href={'/dashboard/databases/commands'}>
                                 Perguntas
                             </Link>
                         </DropdownMenuItem>

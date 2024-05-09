@@ -1,29 +1,21 @@
-'use client'
+'use server'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import React from 'react'
-import Show from './partials/show'
-import Handle from './partials/handle'
+import { api } from "@/services/axios"
+import { Commands, columns } from "./columns"
+import { DataTable } from "./data-table"
 
-export default function Page() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const action = searchParams.get('action')
-  let id: string | null = null
-  let commandId: string | null = null
+async function getData(): Promise<Commands[]> {
+  const response = await api.get('commands')
+  const commands: Commands[] = response.data
+  return commands
+}
 
-  if (action === 'handle') {
-    id = searchParams.get('id')
-  }
-
-  if (action === 'show') {
-    commandId = searchParams.get('command')
-  }
+export default async function Page() {
+  const data = await getData()
 
   return (
-    <>
-      {action === 'show' && <Show commandId={commandId} router={router} />}
-      {action === 'handle' && <Handle id={id} />}
-    </>
+    <div className="pt-2">
+      <DataTable columns={columns} data={data} />
+    </div>
   )
 }
